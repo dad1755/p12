@@ -66,7 +66,7 @@ if __name__ == '__main__':
 
     if 'openai_api_key' in st.session_state and st.session_state.openai_api_key:
         main()
-    
+
     else:
 
         # if the DB_FILE not exists, create it
@@ -84,13 +84,13 @@ if __name__ == '__main__':
 
         # display the selectbox from db['openai_api_keys']
         selected_key = st.selectbox(
-            label = "Existing OpenAI API Keys", 
+            label = "Existing OpenAI API Keys",
             options = db['openai_api_keys']
         )
 
         # a text input box for entering a new key
         new_key = st.text_input(
-            label="New OpenAI API Key", 
+            label="New OpenAI API Key",
             type="password"
         )
 
