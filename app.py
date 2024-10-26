@@ -72,7 +72,7 @@ def login_page():
         if username == st.secrets["username"] and password == st.secrets["password"]:
             st.session_state["authenticated"] = True
             st.success("Logged in successfully!")
-            st.experimental_rerun()
+            st.rerun()
         else:
             st.error("Invalid username or password")
 
