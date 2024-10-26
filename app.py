@@ -3,11 +3,11 @@ from openai import OpenAI
 import json
 import os
 
-
 DB_FILE = 'db.json'
 
 def main():
-    client = OpenAI(api_key=st.session_state.openai_api_key)
+    # Initialize OpenAI client using the secret-stored API key
+    client = OpenAI(api_key=st.secrets["openai_api_key"])
 
     # List of models
     models = ["gpt-4o-mini", "gpt-4o", "gpt-4-turbo", "gpt-4", "gpt-3.5-turbo"]
@@ -61,55 +61,37 @@ def main():
         st.session_state.messages = []
         st.rerun()
 
+def login_page():
+    st.title("Login")
+    username = st.text_input("Username")
+    password = st.text_input("Password", type="password")
+    login_button = st.button("Login")
+
+    # Authenticate using st.secrets for username and password
+    if login_button:
+        if username == st.secrets["username"] and password == st.secrets["password"]:
+            st.session_state["authenticated"] = True
+            st.success("Logged in successfully!")
+            st.experimental_rerun()
+        else:
+            st.error("Invalid username or password")
 
 if __name__ == '__main__':
+    # Initialize chat history and authentication
+    if "authenticated" not in st.session_state:
+        st.session_state["authenticated"] = False
 
-    if 'openai_api_key' in st.session_state and st.session_state.openai_api_key:
+    # Create DB file if it does not exist
+    if not os.path.exists(DB_FILE):
+        with open(DB_FILE, 'w') as file:
+            db = {
+                'openai_api_keys': [],
+                'chat_history': []
+            }
+            json.dump(db, file)
+
+    # Display login page or main app
+    if st.session_state["authenticated"]:
         main()
-
     else:
-
-        # if the DB_FILE not exists, create it
-        if not os.path.exists(DB_FILE):
-            with open(DB_FILE, 'w') as file:
-                db = {
-                    'openai_api_keys': [],
-                    'chat_history': []
-                }
-                json.dump(db, file)
-        # load the database
-        else:
-            with open(DB_FILE, 'r') as file:
-                db = json.load(file)
-
-        # display the selectbox from db['openai_api_keys']
-        selected_key = st.selectbox(
-            label = "Existing OpenAI API Keys",
-            options = db['openai_api_keys']
-        )
-
-        # a text input box for entering a new key
-        new_key = st.text_input(
-            label="New OpenAI API Key",
-            type="password"
-        )
-
-        login = st.button("Login")
-
-        # if new_key is given, add it to db['openai_api_keys']
-        # if new_key is not given, use the selected_key
-        if login:
-            if new_key:
-                db['openai_api_keys'].append(new_key)
-                with open(DB_FILE, 'w') as file:
-                    json.dump(db, file)
-                st.success("Key saved successfully.")
-                st.session_state['openai_api_key'] = new_key
-                st.rerun()
-            else:
-                if selected_key:
-                    st.success(f"Logged in with key '{selected_key}'")
-                    st.session_state['openai_api_key'] = selected_key
-                    st.rerun()
-                else:
-                    st.error("API Key is required to login")
+        login_page()
